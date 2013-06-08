@@ -66,7 +66,7 @@
 #define IO 2
 #define NO_BLOCK_DETAIL 3
 
-char *EXECNAME;
+extern char *EXECNAME;
 
 /**
  * option

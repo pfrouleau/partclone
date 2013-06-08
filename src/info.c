@@ -30,6 +30,8 @@
  */
 #include "partclone.h"
 
+char *EXECNAME = "partclone.info";
+
 /// cmd_opt structure defined in partclone.h
 cmd_opt opt;
 
