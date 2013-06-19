@@ -257,6 +257,17 @@ int main(int argc, char **argv) {
 		log_mesg(0, 0, 1, debug, "Calculating bitmap... Please wait... ");
 		readbitmap(source, image_hdr, bitmap, pui);
 
+		// check used count
+		unsigned c = 0, ii;
+		for(ii = 0; ii < image_hdr.totalblock; ++ii)
+		{
+			if(pc_test_bit(ii, bitmap)) ++c;
+		}
+		if(c!=image_hdr.usedblocks)
+		{
+			log_mesg(0, 1, 1, debug, "used count does NOT match [%d != %d] %d\n", (unsigned)image_hdr.usedblocks, c, 3);
+		}
+
 		needed_size = (unsigned long long)(((image_hdr.block_size+sizeof(unsigned long))*image_hdr.usedblocks)+sizeof(image_hdr)+sizeof(char)*image_hdr.totalblock);
 		if (opt.check)
 			check_free_space(&dfw, needed_size);
