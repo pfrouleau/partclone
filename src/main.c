@@ -519,6 +519,27 @@ int main(int argc, char **argv) {
 		free(write_buffer);
 		free(read_buffer);
 
+	// only check the image's size when it does not contains checksums
+	} else if (opt.chkimg && img_opt.checksum_mode == CSM_NONE) {
+
+		unsigned long long total_offset = (fs_info.usedblocks - 1) * fs_info.block_size;
+		char last_block[fs_info.block_size];
+		off_t partial_offset = INT32_MAX;
+
+		while (total_offset) {
+
+			if (partial_offset > total_offset)
+				partial_offset = total_offset;
+
+			if (lseek(dfr, partial_offset, SEEK_CUR) == (off_t)-1)
+				log_mesg(0, 1, 1, debug, "source seek ERROR: %s\n", strerror(errno));
+
+			total_offset -= partial_offset;
+		}
+
+		if (read_all(&dfr, last_block, fs_info.block_size, &opt) != fs_info.block_size)
+			log_mesg(0, 1, 1, debug, "ERROR: source image too short\n");
+
 	} else if (opt.restore) {
 
 		const unsigned long long blocks_total = fs_info.totalblock;
