@@ -128,7 +128,7 @@ cat > ${file}.tmp << EOF
 EOF
   # Do not modify the version file if the content did not change
   diff ${file}.tmp ${file} > /dev/null
-  if [ "$?" = "1" ]
+  if [ "$?" != "0" ]
   then
     echo "update ${file}"
     mv ${file}.tmp ${file}
