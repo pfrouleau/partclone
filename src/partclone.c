@@ -839,8 +839,6 @@ void load_image_desc(int* ret, cmd_opt* opt, file_system_info* fs_info, image_op
 		const image_desc_v1* buf_v1 = (image_desc_v1*)&buf_v2;
 		image_options_v1 extra;
 
-		log_mesg(0, 0, 1, debug, "Image format 0001\n");
-
 		// read the extra bytes
 		if (read_all(ret, extra.buff, sizeof(image_desc_v1) - sizeof(image_desc_v2), opt) == -1)
 			log_mesg(0, 1, 1, debug, "read image_hdr error=%d\n (%s)", r_size, strerror(errno));
@@ -851,8 +849,6 @@ void load_image_desc(int* ret, cmd_opt* opt, file_system_info* fs_info, image_op
 
 	case 0x0002: {
 		uint32_t crc;
-
-		log_mesg(0, 0, 1, debug, "Image format 0002\n");
 
 		// Verify checksum
 		init_crc32(&crc);
