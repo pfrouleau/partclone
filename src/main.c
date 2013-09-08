@@ -562,7 +562,8 @@ int main(int argc, char **argv) {
 		log_mesg(1, 0, 0, debug, "start restore data...\n");
 
 		blocks_in_cs = 0;
-		init_checksum(img_opt.checksum_mode, checksum, debug);
+		if (!opt.ignore_crc)
+			init_checksum(img_opt.checksum_mode, checksum, debug);
 
 		block_id = 0;
 		do {
