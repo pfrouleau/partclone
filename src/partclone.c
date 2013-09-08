@@ -1147,13 +1147,13 @@ void load_image_bitmap_bits(int* ret, cmd_opt opt, file_system_info fs_info, uns
 
 	r_size = read_all(ret, (char*)&r_crc, sizeof(r_crc), &opt);
 	if (r_size != sizeof(r_crc))
-		log_mesg(0, 1, 1, opt.debug, "read bitmap's crc error");
+		log_mesg(0, 1, 1, opt.debug, "read bitmap's crc error\n");
 
 	init_crc32(&crc);
 
 	crc = crc32(crc, bitmap, bitmap_size);
 	if (crc != r_crc)
-		log_mesg(0, 1, 1, opt.debug, "read bitmap's crc error");
+		log_mesg(0, 1, 1, opt.debug, "read bitmap's crc error\n");
 }
 
 void load_image_bitmap_bytes(int* ret, cmd_opt opt, file_system_info fs_info, unsigned long* bitmap) {
