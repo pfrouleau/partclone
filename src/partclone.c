@@ -95,6 +95,9 @@ int get_cpu_bits()
  */
 void set_image_options_v1(image_options* img_opt)
 {
+	// reset options
+	memset(img_opt, 0, sizeof(image_options));
+
 	img_opt->image_version = 0x0001;
 	img_opt->checksum_mode = CSM_CRC32_0001;
 	img_opt->checksum_size = CRC32_SIZE;
