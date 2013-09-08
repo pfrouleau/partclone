@@ -577,8 +577,6 @@ int main(int argc, char **argv) {
 			if (!blocks_read)
 				break;
 
-			read_offset = bugcheck ? 4 : 0;
-
 			log_mesg(1, 0, 0, debug, "blocks_read = %d\n", blocks_read);
 			read_size = cnv_blocks_to_bytes(blocks_read, block_size, &img_opt);
 
@@ -587,7 +585,7 @@ int main(int argc, char **argv) {
 
 				if (bugcheck) {
 
-					read_size += blocks_read * cs_size;
+					read_size += blocks_read * CRC32_SIZE;
 
 				} else if (blocks_read % blocks_per_cs) {
 
@@ -622,8 +620,9 @@ int main(int argc, char **argv) {
 			// <block1><block2>...
 
 			// fill up write buffer, validate checksum
-		recheck:
 			memcpy(cs_saved, checksum, cs_size);
+		recheck:
+			read_offset = 0;
 			for (i = 0; i < blocks_read; ++i) {
 
 				memcpy(write_buffer + i * block_size,
@@ -649,8 +648,8 @@ int main(int argc, char **argv) {
 								"trying enlarge crc size and recheck again...\n");
 							// the bug has written the crc with 4 extra bytes, so the read buffer is like this:
 							// <block1><crc1><bug><block2><crc2><bug>...
-							read_offset += 4;
-							blocks_in_cs -= 1;
+							read_all(&dfr, read_buffer + read_size, blocks_read * CRC32_SIZE, &opt);
+							blocks_in_cs = 0;
 							bugcheck = 1;
 							memcpy(checksum, cs_saved, cs_size);
 							goto recheck;
@@ -659,7 +658,7 @@ int main(int argc, char **argv) {
 
 					read_offset += cs_size;
 					if (bugcheck)
-						read_offset += cs_size;
+						read_offset += CRC32_SIZE;
 
 					blocks_in_cs = 0;
 					if (opt.reseed_checksum)
