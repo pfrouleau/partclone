@@ -206,6 +206,9 @@ typedef struct
 	/// How many consecutive blocks are checksumed together.
 	uint32_t blocks_per_checksum;
 
+	/// Reseed the checksum after each write (1 = yes; 0 = no)
+	uint8_t reseed_checksum;
+
 	/// Kind of bitmap stored in the image (see bitmap_mode_enum)
 	uint8_t bitmap_mode;
 

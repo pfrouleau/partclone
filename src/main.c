@@ -125,6 +125,7 @@ int main(int argc, char **argv) {
 	int			dfr, dfw;		/// file descriptor for source and target
 	int			r_size, w_size;		/// read and write size
 	unsigned		cs_size = 0;		/// checksum_size
+	int			cs_reseed = 1;
 	int			start, stop;		/// start, range, stop number for progress bar
 	unsigned long *bitmap = NULL;		/// the point for bitmap data
 	int			debug = 0;		/// debug level
@@ -232,8 +233,10 @@ int main(int argc, char **argv) {
 		img_opt.checksum_mode = opt.checksum_mode;
 		img_opt.checksum_size = get_checksum_size(opt.checksum_mode, opt.debug);
 		img_opt.blocks_per_checksum = opt.blocks_per_checksum;
+		img_opt.reseed_checksum = opt.reseed_checksum;
 
 		cs_size = img_opt.checksum_size;
+		cs_reseed = img_opt.reseed_checksum;
 
 		log_mesg(1, 0, 0, debug, "Initial image hdr - get Super Block from partition\n");
 		log_mesg(0, 0, 1, debug, "Reading Super Block\n");
@@ -294,6 +297,7 @@ int main(int argc, char **argv) {
 		/// get image information from image file
 		load_image_desc(&dfr, &opt, &fs_info, &img_opt);
 		cs_size = img_opt.checksum_size;
+		cs_reseed = img_opt.reseed_checksum;
 
 		check_mem_size(fs_info, img_opt, opt);
 
@@ -481,7 +485,7 @@ int main(int argc, char **argv) {
 					write_offset += cs_size;
 
 					blocks_in_cs = 0;
-					if (opt.reseed_checksum)
+					if (cs_reseed)
 						init_checksum(img_opt.checksum_mode, checksum, debug);
 				}
 			}
@@ -661,7 +665,7 @@ int main(int argc, char **argv) {
 						read_offset += CRC32_SIZE;
 
 					blocks_in_cs = 0;
-					if (opt.reseed_checksum)
+					if (cs_reseed)
 						init_checksum(img_opt.checksum_mode, checksum, debug);
 				}
 

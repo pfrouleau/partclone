@@ -102,6 +102,7 @@ void set_image_options_v1(image_options* img_opt)
 	img_opt->checksum_mode = CSM_CRC32_0001;
 	img_opt->checksum_size = CRC32_SIZE;
 	img_opt->blocks_per_checksum = 1;
+	img_opt->reseed_checksum = 0;
 	img_opt->bitmap_mode = BM_BYTE;
 }
 
@@ -114,6 +115,7 @@ void set_image_options_v2(image_options* img_opt)
 	img_opt->checksum_mode = CSM_CRC32;
 	img_opt->checksum_size = CRC32_SIZE;
 	img_opt->blocks_per_checksum = 0;
+	img_opt->reseed_checksum = 1;
 	img_opt->bitmap_mode = BM_BIT;
 }
 
