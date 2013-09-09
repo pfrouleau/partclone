@@ -115,7 +115,7 @@ typedef struct cmd_opt cmd_opt;
 /* Disable fields alignment for struct stored in the image */
 #pragma pack(push, 1)
 
-#define ENDIAN_MAGIC 0x00C0DE00
+#define ENDIAN_MAGIC 0xC0DE
 
 typedef struct
 {
@@ -136,8 +136,8 @@ typedef struct
     /// Image's version
     char version[IMAGE_VERSION_SIZE];
 
-    /// 0x00C0DE00 = little-endian, 0x00DEC000 = big-endian
-    uint32_t endianess;
+    /// 0xC0DE = little-endian, 0xDEC0 = big-endian
+    uint16_t endianess;
 
 } image_head_v2;
 
