@@ -908,11 +908,16 @@ void load_image_desc(int* ret, cmd_opt* opt, image_head_v2* img_head, file_syste
 	} //switch
 }
 
-void write_image_desc(int* ret, file_system_info fs_info, image_options img_opt, cmd_opt* opt) {
+void write_image_desc(int* ret, file_system_info fs_info, image_options* img_opt, cmd_opt* opt) {
 
 	image_desc_v2 buf_v2;
 
 	init_image_head_v2(&buf_v2.head);
+
+	/// No need to save a bitmap when all blocks are in use
+	if (fs_info.used_bitmap == fs_info.totalblock) {
+		img_opt->bitmap_mode = BM_NONE;
+	}
 
 	memcpy(&buf_v2.fs_info, &fs_info, sizeof(file_system_info));
 	memcpy(&buf_v2.options, &img_opt, sizeof(image_options));

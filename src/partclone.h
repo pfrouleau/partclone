@@ -279,7 +279,7 @@ extern void init_fs_info(file_system_info* fs_info);
 extern void init_image_options(image_options* img_opt);
 extern void load_image_desc(int* ret, cmd_opt* opt, image_head_v2* img_head, file_system_info* fs_info, image_options* img_opt);
 extern void load_image_bitmap(int* ret, cmd_opt opt, file_system_info fs_info, image_options img_opt, unsigned long* bitmap);
-extern void write_image_desc(int* ret, file_system_info fs_info, image_options img_opt, cmd_opt* opt);
+extern void write_image_desc(int* ret, file_system_info fs_info, image_options* img_opt, cmd_opt* opt);
 extern void write_image_bitmap(int* ret, file_system_info fs_info, image_options img_opt, unsigned long* bitmap, cmd_opt* opt);
 
 extern const char *get_bitmap_mode_str(bitmap_mode_t bitmap_mode);
