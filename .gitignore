@@ -10,6 +10,8 @@ po/Makefile.in
 fail-mbr/fail-mbr.bin
 fail-mbr/fail-mbr.image
 src/.deps/
+src/btrfs/.deps/
+src/exfat/.deps/
 src/partclone.btrfs
 src/partclone.fstype
 src/partclone.jfs
