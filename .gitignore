@@ -1,3 +1,4 @@
+*~
 *.o
 */Makefile
 Makefile
@@ -11,6 +12,7 @@ fail-mbr/fail-mbr.bin
 fail-mbr/fail-mbr.image
 src/.deps/
 src/btrfs/.deps/
+src/btrfs/.dirstamp
 src/exfat/.deps/
 src/partclone.btrfs
 src/partclone.fstype
