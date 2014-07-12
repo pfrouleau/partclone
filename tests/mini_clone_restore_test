@@ -4,8 +4,8 @@ set -e
 . _common
 
 ## blocks/checksum to test various patterns
-cs_a=(0   1   1   1   1     1)
-cs_k=(0  17   1  64   0  3097)
+cs_a=(0  0   1   1   1   1     1)
+cs_k=(0  0  17   1  64   0  3097)
 cs_s=${#cs_k[*]}               # array size
 cs_i=0
 
@@ -14,16 +14,20 @@ normal_fs="ext2 ext3 ext4 vfat exfat minix"
 featured_fs="$normal_fs jfs xfs reiserfs hfsplus"
 extra_fs="$featured_fs ufs vmfs reiser4 ntfs btrfs"
 
-manual_fs=$1
+manual_fs="$*"
 
 test_fs=$featured_fs
 dd_count=$normal_size
-[ -z $manual_fs ] || test_fs=$manual_fs
+[ -z "$manual_fs" ] || test_fs="$manual_fs"
 
 #main
 for fs in $test_fs; do
 
-    cs_i=$(( (cs_i + 1) % cs_s))
+    #cs_i=$(( (cs_i + 1) % cs_s))
+
+    cs_i=0
+    while ((cs_i < $cs_s)) ; do
+    cs_i=$((cs_i+1))
     a=${cs_a[$cs_i]}
     k=${cs_k[$cs_i]}
 
@@ -33,44 +37,48 @@ for fs in $test_fs; do
     mkfs=$(_findmkfs $fs)
     echo -e "\ncreate raw file $raw\n"
     _ptlbreak
-    [ -f $raw ] && rm $raw
-    echo -e "    dd if=/dev/zero of=$raw bs=$dd_bs count=$dd_count\n"
-    dd if=/dev/zero of=$raw bs=$dd_bs count=$dd_count
+    #[ -f $raw ] && rm $raw
+    echo -e "    dd if=/dev/zero of=$fs.raw bs=$dd_bs count=$dd_count\n"
+    dd if=/dev/zero of=$fs.raw bs=$dd_bs count=$dd_count
 
-    echo -e "\n\nformat $raw as $fs raw partition\n"
+    echo -e "\n\nformat $fs.raw as $fs raw partition\n"
     echo -e "    mkfs.$fs `eval echo "$"mkfs_option_for_$fs""` $raw\n"
     _ptlbreak
-    $mkfs `eval echo "$"mkfs_option_for_$fs""` $raw
+    $mkfs `eval echo "$"mkfs_option_for_$fs""` $fs.raw
 
-    echo -e "\nclone $raw to $img\n"
-    [ -f $img ] && rm $img
-    echo -e "    $ptlfs -d -c -s $raw -O $img -F -L $logfile -a $a -k $k"
+    echo -e "\nclone $fs.raw to $fs.img\n"
+    #[ -f $img ] && rm $img
+    echo -e "    $ptlfs -d -c -s $fs.raw -O $fs.img -F -L $fs.clone -a $a -k $k"
     _ptlbreak
-    $ptlfs -d -c -s $raw -O $img -F -L $logfile -a $a -k $k
+    $ptlfs -d2 -c -s $fs.raw -O $fs.img -F -L $fs.clone -a $a -k $k
     _check_return_code
 
     echo -e "\n\ndo image checking\n"
-    echo -e "    $ptlchkimg -s $img -L $logfile\n"
+    echo -e "    $ptlchkimg -s $fs.img -L $fs.chk\n"
     _ptlbreak
-    $ptlchkimg -s $img -L $logfile
+    $ptlchkimg -d2 -s $fs.img -L $fs.chk
     _check_return_code
 
-    echo -e "\n\ncreate raw file $raw for restore\n"
+    echo -e "\n\ncreate raw file $fs.raw.out for restore\n"
     _ptlbreak
-    [ -f $raw ] && rm $raw
-    echo -e "    dd if=/dev/zero of=$raw bs=$dd_bs count=$dd_count\n"
-    dd if=/dev/zero of=$raw bs=$dd_bs count=$dd_count
+    #[ -f $raw ] && rm $raw
+    echo -e "    dd if=/dev/zero of=$fs.raw.out bs=$dd_bs count=$dd_count\n"
+    dd if=/dev/zero of=$fs.raw.out bs=$dd_bs count=$dd_count
 
-    echo -e "\n\nrestore $img to $raw\n"
-    echo -e "    $ptlrestore -s $img -O $raw -C -F -L $logfile\n"
+    echo -e "\n\nrestore $fs.img to $fs.raw.out\n"
+    echo -e "    $ptlrestore -s $fs.img -O $fs.raw.out -C -F -L $fs.rest\n"
     _ptlbreak
-    $ptlrestore -s $img -O $raw -C -F -L $logfile
+    $ptlrestore -d2 -s $fs.img -O $fs.raw.out -C -F -L $fs.rest
     _check_return_code
+
+    md5sum $fs.raw*
 
     echo -e "\n\n$fs test ok\n"
     echo -e "\nclear tmp files $img $raw $logfile $md5\n"
     _ptlbreak
-    rm -f $img $raw $logfile $md5
+    #rm -f $img $raw $logfile $md5
+
+    done
 
     echo -e "\nfile system $fs test done\n"
 done
