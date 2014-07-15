@@ -154,7 +154,7 @@ void read_bitmap(char* device, file_system_info fs_info, unsigned long* bitmap, 
 		current_block = block + blk_itr;
 
 		/// check block is used or not
-		if ((B_UN_INIT) || (!in_use(block_bitmap, block))) {
+		if (!in_use(block_bitmap, block)) {
 		    free++;
 		    gfree++;
 		    pc_clear_bit(current_block, bitmap);
