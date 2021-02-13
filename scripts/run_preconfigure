@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Extracted from HACKING:
+libtoolize --force --copy &&
+aclocal -I m4 &&
+autoconf &&
+autoheader &&
+automake --add-missing

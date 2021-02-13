@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd tests
+
+./mini_clone_restore_test ext2 ext3 ext4 vfat exfat minix xfs hfsplus reiser4 ntfs f2fs nilfs2 apfs hfsp
+
+./mini_clone_restore_test -f 114294784 btrfs

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+./configure --prefix=/usr --sbindir=/usr/bin \
+	--enable-apfs \
+	--enable-btrfs \
+	--enable-exfat \
+	--enable-extfs \
+	--enable-f2fs \
+	--enable-fat \
+	--enable-hfsp \
+	--enable-nilfs2 \
+	--enable-minix \
+	--enable-ntfs \
+	--enable-reiser4 \
+	--enable-xfs
