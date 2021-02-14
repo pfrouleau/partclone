@@ -20,6 +20,10 @@ RUN apt-get update
 # Install all partclone's dependencies
 RUN apt-get build-dep -y partclone
 
+# Install file systems tools
+RUN apt-get install -y btrfs-progs dosfstools exfat-utils f2fs-tools hfsprogs jfsutils \
+                       reiser4progs reiserfsprogs ufsutils vmfs-tools
+
 # Install optional tools for quality-of-life when debugging
 RUN apt-get install -y git nano rsync tmux vim
 
@@ -29,4 +33,4 @@ RUN echo 'debconf debconf/frontend select Dialog' | debconf-set-selections
 WORKDIR /projects
 
 # Scripts to simplify tasks in container
-COPY scripts/* .
+COPY scripts/* ./
