@@ -37,28 +37,22 @@ int PUI;
 unsigned long RES=0;
 
 /// initial progress bar
-extern void progress_init(struct progress_bar *prog, int start, unsigned long long stop, unsigned long long total, int flag, int size)
+extern void progress_init(struct progress_bar *prog, unsigned long long start, unsigned long long stop, unsigned long long total, int flag, int size)
 {
     memset(prog, 0, sizeof(progress_bar));
+
     prog->start = start;
     prog->stop = stop;
     prog->total = total;
 
-    prog->unit = 100.0 / (stop - start);
-    prog->total_unit = 100.0 / (total - start);
-
-    if (!isnormal(prog->unit) || !isnormal(prog->total_unit)){
-        prog->unit = 0;
-        prog->total_unit = 0;
-    }
-
     prog->initial_time = time(0);
     prog->resolution_time = time(0);
     prog->interval_time = 1;
-    prog->block_size = size;
     if (RES){
         prog->interval_time = RES;
     }
+    prog->block_size = size;
+    prog->block_count = stop - start; // can give zero, ex: swap
     prog->rate = 0.0;
     prog->pui = PUI;
     prog->flag = flag;
@@ -111,53 +105,52 @@ static void calculate_speed(struct progress_bar *prog, unsigned long long copied
     time_t remained;
     time_t elapsed;
     char Rformated[12], Eformated[12];
-    char speed_unit[] = "    ";
     struct tm *Rtm, *Etm;
     uint64_t gbyte=1000000000.0;
     uint64_t mbyte=1000000;
     uint64_t kbyte=1000;
     int spflen = 0;
 
-    percent  = prog->unit * copied;
-    if (percent <= 0)
-	percent = 1;
-    else if (percent >= 100)
+    if (prog->block_count == 0) {
 	percent = 99.99;
+    } else {
+	percent = copied/(float)(prog->block_count);
+	if (percent <= 0)
+	    percent = 1;
+	else if (percent >= 100)
+	    percent = 99.99;
+    }
 
-    elapsed  = (time(0) - prog->initial_time);
+    prog_stat->percent = percent;
+
+    elapsed = (time(0) - prog->initial_time);
     if (elapsed <= 0)
 	elapsed = 1;
 
-    speedps  = prog->block_size * copied / elapsed;
+    speedps = prog->block_size * copied / elapsed;
     speed = speedps * 60.0;
-
-    prog_stat->percent   = percent;
 
     if (speed >= gbyte){
 	dspeed = (double)speed / (double)gbyte;
-	strncpy(speed_unit, "GB", 3);
-	strncpy(prog_stat->speed_unit, speed_unit, 3);
+	strncpy(prog_stat->speed_unit, "GB", 3);
     }else if (speed >= mbyte){
 	dspeed = (double)speed / (double)mbyte;
-	strncpy(speed_unit, "MB", 3);
-	strncpy(prog_stat->speed_unit, speed_unit, 3);
+	strncpy(prog_stat->speed_unit, "MB", 3);
     }else if (speed >= kbyte){
 	dspeed = (double)speed / (double)kbyte;
-	strncpy(speed_unit, "KB", 3);
-	strncpy(prog_stat->speed_unit, speed_unit, 3);
+	strncpy(prog_stat->speed_unit, "KB", 3);
     }else{
 	dspeed = speed;
-	strncpy(speed_unit, "byte", 5);
-	strncpy(prog_stat->speed_unit, speed_unit, 5);
+	strncpy(prog_stat->speed_unit, "byte", 5);
     }
 
-    prog_stat->total_percent = prog->total_unit * current;
+    prog_stat->speed = dspeed;
 
-    prog_stat->speed     = dspeed;
+    prog_stat->total_percent = current / (float)(prog->total);
 
     if (done != 1){
-        remained = (time_t)((elapsed/percent*100) - elapsed);
-        spflen = 0;
+	remained = (time_t)((elapsed/percent*100) - elapsed);
+	spflen = 0;
 	if ((unsigned int)remained > 86400){
 	    spflen = snprintf(NULL, 0, " > %3i hrs ", ((int)remained/3600));
 	    snprintf(Rformated, spflen, " > %3i hrs ", ((int)remained/3600));
@@ -165,28 +158,19 @@ static void calculate_speed(struct progress_bar *prog, unsigned long long copied
 	    Rtm = gmtime(&remained);
 	    strftime(Rformated, sizeof(Rformated), format, Rtm);
 	}
-
-	if ((unsigned int)elapsed > 86400){
-	    spflen = snprintf(NULL, 0, " > %3i hrs ", ((int)elapsed/3600));
-	    snprintf(Eformated, spflen, " > %3i hrs ", ((int)elapsed/3600));
-	}else{
-	    Etm = gmtime(&elapsed);
-	    strftime(Eformated, sizeof(Eformated), format, Etm);
-	}
-
     } else {
-        prog_stat->percent=100;
-        remained = (time_t)0;
-        Rtm = gmtime(&remained);
+	prog_stat->percent=100;
+	remained = (time_t)0;
+	Rtm = gmtime(&remained);
 	strftime(Rformated, sizeof(Rformated), format, Rtm);
+    }
 
-	if ((unsigned int)elapsed > 86400){
-	    spflen = snprintf(NULL, 0, " > %3i hrs ", ((int)elapsed/3600));
-	    snprintf(Eformated, spflen, " > %3i hrs ", ((int)elapsed/3600));
-	}else{
-	    Etm = gmtime(&elapsed);
-	    strftime(Eformated, sizeof(Eformated), format, Etm);
-	}
+    if ((unsigned int)elapsed > 86400){
+	spflen = snprintf(NULL, 0, " > %3i hrs ", ((int)elapsed/3600));
+	snprintf(Eformated, spflen, " > %3i hrs ", ((int)elapsed/3600));
+    }else{
+	Etm = gmtime(&elapsed);
+	strftime(Eformated, sizeof(Eformated), format, Etm);
     }
 
     strncpy(prog_stat->Eformated, Eformated, sizeof(Eformated)+1);
